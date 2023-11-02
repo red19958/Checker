@@ -1,5 +1,6 @@
 package com.checker.ui.listApps
 
+import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -24,7 +26,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
@@ -36,12 +37,21 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.coroutineScope
 import com.checker.AppItem
 import com.checker.factory
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class AppsFragment : Fragment() {
     private val viewModel: AppsViewModel by viewModels { factory() }
-    private lateinit var items: Flow<List<AppItem>>
+
+    private val previewList = listOf(
+        AppItem(
+            0,
+            Bitmap.createBitmap(80, 80, Bitmap.Config.ARGB_8888),
+            "Qwerty",
+            "Services: ServiceMeow",
+            "Providers: ProviderMeow",
+            "Receivers: ReceiverMeow",
+        )
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,33 +62,36 @@ class AppsFragment : Fragment() {
 
         val view = ComposeView(requireContext()).apply {
             setContent {
-                AppItemList(onItemClick = {})
+                AppItemList(emptyList(), onItemClick = {})
             }
         }
 
-        items = viewModel.apps
         return view
     }
 
     @Preview
     @Composable
-    fun AppsScreen() {
-        AppItemList(onItemClick = {})
+    internal fun AppsScreen() {
+        AppItemList(previewList, onItemClick = {})
     }
 
     @Composable
-    fun AppItemList(onItemClick: (AppItem) -> Unit) {
-        val apps by items.collectAsState(initial = emptyList())
-        
+    internal fun AppItemList(initial: List<AppItem>, onItemClick: (AppItem) -> Unit) {
+        val apps by viewModel.apps.collectAsState(initial = initial)
+        val scrollState = rememberLazyListState()
         Column(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(modifier = Modifier.weight(1f)) {
+            LazyColumn(modifier = Modifier.weight(1f), state = scrollState) {
                 items(apps) { item ->
                     AppItemCard(item = item, onItemClick = onItemClick)
                 }
             }
 
             Button(
-                onClick = {},
+                onClick = {
+                    viewModel.initApps()
+                    lifecycle.coroutineScope.launch { scrollState.scrollToItem(0) }
+                },
+
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
@@ -88,7 +101,7 @@ class AppsFragment : Fragment() {
     }
 
     @Composable
-    fun AppItemCard(item: AppItem, onItemClick: (AppItem) -> Unit) {
+    internal fun AppItemCard(item: AppItem, onItemClick: (AppItem) -> Unit) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -100,7 +113,7 @@ class AppsFragment : Fragment() {
                 modifier = Modifier.padding(16.dp)
             ) {
                 Image(
-                    painter = BitmapPainter(item.bitmap.asImageBitmap()),
+                    painter = BitmapPainter(item.image.asImageBitmap()),
                     contentDescription = null,
                     modifier = Modifier
                         .size(80.dp)
@@ -110,18 +123,40 @@ class AppsFragment : Fragment() {
 
                 Column {
                     Text(
-                        text = item.text1,
+                        text = item.name,
                         modifier = Modifier
                             .fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    if (item.services.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(
-                        text = item.text2 ?: "",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                    )
+                        Text(
+                            text = "Services: " + item.services,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                    }
+
+                    if (item.providers.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = "Providers: " + item.providers,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                    }
+
+                    if (item.receivers.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = "Receivers: " + item.receivers,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                    }
                 }
             }
         }

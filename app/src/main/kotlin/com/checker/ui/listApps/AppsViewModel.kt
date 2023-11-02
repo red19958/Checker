@@ -1,8 +1,8 @@
 package com.checker.ui.listApps
 
-import android.graphics.Bitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.checker.AppInfo
 import com.checker.AppItem
 import com.checker.MyApplication
 import com.checker.Repository
@@ -18,42 +18,33 @@ class AppsViewModel(private val app: MyApplication, private val repository: Repo
         initApps()
     }
 
-    private val _apps = MutableStateFlow(
-        listOf(
-            AppItem(
-                0,
-                Bitmap.createBitmap(80, 80, Bitmap.Config.ARGB_8888),
-                "",
-                ""
-            )
-        )
-    )
+    private val _apps = MutableStateFlow(emptyList<AppItem>())
 
-    val apps = _apps.asStateFlow()
+    internal val apps = _apps.asStateFlow()
 
-
-    private fun initApps() {
+    internal fun initApps() {
         try {
             viewModelScope.launch(Dispatchers.IO) {
-                repository.getAllInstalledAppsAndPermissionsWithIcons(app).collect {
+                repository.getAllInstalledAppsAndEntryPointsWithIcons(app).collect {
                     _apps.emit(it.toAppItem())
                 }
             }
-
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
 
-    private fun Map<String, Pair<String, Bitmap>>.toAppItem(): List<AppItem> {
+    private fun List<AppInfo>.toAppItem(): List<AppItem> {
         var counter = 0
 
-        return this.map {
+        return this.map { item ->
             AppItem(
                 counter++,
-                it.value.second,
-                it.key,
-                it.value.first
+                item.image,
+                item.name,
+                item.services.joinToString(",\n") { it.name },
+                item.providers.joinToString(",\n") { it.name },
+                item.receivers.joinToString(",\n") { it.name },
             )
         }
     }

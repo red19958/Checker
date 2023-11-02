@@ -4,7 +4,9 @@ import android.graphics.Bitmap
 
 data class AppItem(
     val id: Int,
-    val bitmap: Bitmap,
-    var text1: String,
-    var text2: String?,
+    val image: Bitmap,
+    val name: String,
+    val services: String,
+    val providers: String,
+    val receivers: String,
 )
