@@ -2,7 +2,6 @@ package com.checker
 
 import android.app.Application
 import android.content.pm.PackageManager
-import android.util.Log
 import androidx.core.graphics.drawable.toBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -26,8 +25,6 @@ class Repository {
                 val services = packageInfo.services ?: arrayOf()
                 val providers = packageInfo.providers ?: arrayOf()
                 val receivers = packageInfo.receivers ?: arrayOf()
-
-                Log.d("123", if (services.isEmpty()) "" else services[0].toString())
                 val appIcon = packageManager.getApplicationIcon(packageInfo.applicationInfo)
 
                 if(services.isNotEmpty() || providers.isNotEmpty() || receivers.isNotEmpty()) {

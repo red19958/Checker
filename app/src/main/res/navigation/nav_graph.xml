@@ -3,12 +3,28 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/StartFragment"
-    >
+    app:startDestination="@id/AppsFragment">
 
     <fragment
-        android:id="@+id/StartFragment"
+        android:id="@+id/AppsFragment"
         android:name="com.checker.ui.listApps.AppsFragment"
-        android:label="apps_fragment"
-        tools:layout="@layout/start"/>
+        android:label="AppsFragment"
+        tools:layout="@layout/start">
+        <action
+            android:id="@+id/appsFragmentToPointsFragment"
+            app:destination="@id/PointsFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            />
+    </fragment>
+
+
+    <fragment
+        android:id="@+id/PointsFragment"
+        android:name="com.checker.ui.listApps.AppsFragment"
+        android:label="PointsFragment"
+        tools:layout="@layout/start" />
+
 </navigation>
