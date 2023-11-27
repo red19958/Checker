@@ -1,4 +1,4 @@
-package com.checker
+package com.checker.domain
 
 import android.app.Application
 import android.content.pm.PackageManager
@@ -9,8 +9,10 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
 class Repository {
-    fun getAllInstalledAppsAndEntryPointsWithIcons(app: Application): Flow<List<AppInfo>> =
-        flow {
+    internal var appFlow: Flow<List<AppInfo>>? = null
+
+    fun getAllInstalledAppsAndEntryPointsWithIcons(app: Application): Flow<List<AppInfo>> {
+        appFlow = flow {
             val appInfoMutableList = mutableListOf<AppInfo>()
             val packageManager = app.applicationContext.packageManager
             val installedApps = packageManager.getInstalledPackages(
@@ -27,7 +29,7 @@ class Repository {
                 val receivers = packageInfo.receivers ?: arrayOf()
                 val appIcon = packageManager.getApplicationIcon(packageInfo.applicationInfo)
 
-                if(services.isNotEmpty() || providers.isNotEmpty() || receivers.isNotEmpty()) {
+                if (services.isNotEmpty() || providers.isNotEmpty() || receivers.isNotEmpty()) {
                     appInfoMutableList.add(
                         AppInfo(
                             appName,
@@ -42,4 +44,8 @@ class Repository {
 
             emit(appInfoMutableList)
         }.flowOn(Dispatchers.IO)
+
+        return appFlow!!
+    }
+
 }

@@ -1,17 +1,17 @@
 package com.checker.ui.listApps
 
+import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.checker.AppInfo
-import com.checker.AppItem
-import com.checker.MyApplication
-import com.checker.Repository
+import com.checker.domain.AppInfo
+import com.checker.domain.AppItem
+import com.checker.domain.Repository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class AppsViewModel(private val app: MyApplication, private val repository: Repository) :
+class AppsViewModel(private val app: Application, private val repository: Repository) :
     ViewModel() {
 
     init {

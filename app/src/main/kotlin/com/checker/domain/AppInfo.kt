@@ -1,4 +1,4 @@
-package com.checker
+package com.checker.domain
 
 import android.content.pm.ActivityInfo
 import android.content.pm.ProviderInfo

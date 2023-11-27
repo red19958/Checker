@@ -35,21 +35,26 @@ import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.coroutineScope
-import com.checker.AppItem
+import androidx.navigation.NavController
+import androidx.navigation.fragment.findNavController
+import com.checker.domain.AppItem
 import com.checker.factory
+import com.checker.ui.theme.CheckerTheme
 import kotlinx.coroutines.launch
 
 class AppsFragment : Fragment() {
     private val viewModel: AppsViewModel by viewModels { factory() }
+
+    private lateinit var navController: NavController
 
     private val previewList = listOf(
         AppItem(
             0,
             Bitmap.createBitmap(80, 80, Bitmap.Config.ARGB_8888),
             "Qwerty",
-            "Services: ServiceMeow",
-            "Providers: ProviderMeow",
-            "Receivers: ReceiverMeow",
+            "ServiceMeow",
+            "ProviderMeow",
+            "ReceiverMeow",
         )
     )
 
@@ -62,40 +67,41 @@ class AppsFragment : Fragment() {
 
         val view = ComposeView(requireContext()).apply {
             setContent {
-                AppItemList(emptyList(), onItemClick = {})
+                AppItemList(onItemClick = {
+                    val action = AppsFragmentDirections.appsFragmentToPointsFragment(it)
+                    navController.navigate(action)
+                })
             }
         }
+
+        navController = findNavController()
 
         return view
     }
 
-    @Preview
     @Composable
-    internal fun AppsScreen() {
-        AppItemList(previewList, onItemClick = {})
-    }
-
-    @Composable
-    internal fun AppItemList(initial: List<AppItem>, onItemClick: (AppItem) -> Unit) {
-        val apps by viewModel.apps.collectAsState(initial = initial)
-        val scrollState = rememberLazyListState()
-        Column(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(modifier = Modifier.weight(1f), state = scrollState) {
-                items(apps) { item ->
-                    AppItemCard(item = item, onItemClick = onItemClick)
+    internal fun AppItemList(onItemClick: (AppItem) -> Unit) {
+        CheckerTheme {
+            val apps by viewModel.apps.collectAsState(initial = emptyList())
+            val scrollState = rememberLazyListState()
+            Column(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(modifier = Modifier.weight(1f), state = scrollState) {
+                    items(apps) { item ->
+                        AppItemCard(item = item, onItemClick = onItemClick)
+                    }
                 }
-            }
 
-            Button(
-                onClick = {
-                    viewModel.initApps()
-                    lifecycle.coroutineScope.launch { scrollState.scrollToItem(0) }
-                },
+                Button(
+                    onClick = {
+                        viewModel.initApps()
+                        lifecycle.coroutineScope.launch { scrollState.scrollToItem(0) }
+                    },
 
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(text = "Update")
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text(text = "Update")
+                }
             }
         }
     }
@@ -157,6 +163,29 @@ class AppsFragment : Fragment() {
                                 .fillMaxWidth()
                         )
                     }
+                }
+            }
+        }
+    }
+
+    @Preview
+    @Composable
+    fun AppScreen() {
+        CheckerTheme {
+            val scrollState = rememberLazyListState()
+            Column(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(modifier = Modifier.weight(1f), state = scrollState) {
+                    items(previewList) { item ->
+                        AppItemCard(item = item, onItemClick = {})
+                    }
+                }
+
+                Button(
+                    onClick = {},
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text(text = "Update")
                 }
             }
         }

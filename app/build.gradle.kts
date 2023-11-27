@@ -3,6 +3,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("androidx.navigation.safeargs")
     id("kotlin-kapt")
+    id("kotlin-parcelize")
     alias(libs.plugins.detekt)
     alias(libs.plugins.ktlint.gradle)
 }
@@ -73,12 +74,13 @@ dependencies {
     implementation(libs.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.appcompat)
+    implementation(libs.androidx.ui.tooling)
+    implementation(libs.androidx.ui.test.manifest)
+    implementation(libs.ui.runtime)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.tooling)
-    debugImplementation(libs.androidx.ui.test.manifest)
 
     //dagger
     implementation(libs.dagger)
