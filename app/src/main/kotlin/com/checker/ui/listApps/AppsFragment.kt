@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,10 +23,13 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
@@ -52,9 +56,9 @@ class AppsFragment : Fragment() {
             0,
             Bitmap.createBitmap(80, 80, Bitmap.Config.ARGB_8888),
             "Qwerty",
-            "ServiceMeow",
-            "ProviderMeow",
-            "ReceiverMeow",
+            listOf("ServiceMeow"),
+            listOf("ProviderMeow"),
+            listOf("ReceiverMeow"),
         )
     )
 
@@ -83,26 +87,46 @@ class AppsFragment : Fragment() {
     internal fun AppItemList(onItemClick: (AppItem) -> Unit) {
         CheckerTheme {
             val apps by viewModel.apps.collectAsState(initial = emptyList())
+            val downloaded by viewModel.downloaded.collectAsState(initial = false)
             val scrollState = rememberLazyListState()
-            Column(modifier = Modifier.fillMaxSize()) {
-                LazyColumn(modifier = Modifier.weight(1f), state = scrollState) {
-                    items(apps) { item ->
-                        AppItemCard(item = item, onItemClick = onItemClick)
+
+            Box {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(modifier = Modifier.weight(1f), state = scrollState) {
+                        items(apps) { item ->
+                            AppItemCard(item = item, onItemClick = onItemClick)
+                        }
+                    }
+
+                    LaunchedEffect(Unit) {
+                        viewModel.apps.collect {
+                            lifecycle.coroutineScope.launch {
+                                scrollState.scrollToItem(0)
+                            }
+                        }
+                    }
+
+                    Button(
+                        onClick = {
+                            viewModel.initApps()
+                        },
+
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(text = "Update")
                     }
                 }
 
-                Button(
-                    onClick = {
-                        viewModel.initApps()
-                        lifecycle.coroutineScope.launch { scrollState.scrollToItem(0) }
-                    },
-
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Text(text = "Update")
+                if (!downloaded) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .align(Alignment.TopCenter)
+                    )
                 }
             }
+
         }
     }
 
@@ -138,7 +162,7 @@ class AppsFragment : Fragment() {
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
-                            text = "Services: " + item.services,
+                            text = "Services: " + item.services.size,
                             modifier = Modifier
                                 .fillMaxWidth()
                         )
@@ -148,7 +172,7 @@ class AppsFragment : Fragment() {
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
-                            text = "Providers: " + item.providers,
+                            text = "Providers: " + item.providers.size,
                             modifier = Modifier
                                 .fillMaxWidth()
                         )
@@ -158,7 +182,7 @@ class AppsFragment : Fragment() {
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
-                            text = "Receivers: " + item.receivers,
+                            text = "Receivers: " + item.receivers.size,
                             modifier = Modifier
                                 .fillMaxWidth()
                         )
@@ -173,20 +197,28 @@ class AppsFragment : Fragment() {
     fun AppScreen() {
         CheckerTheme {
             val scrollState = rememberLazyListState()
-            Column(modifier = Modifier.fillMaxSize()) {
-                LazyColumn(modifier = Modifier.weight(1f), state = scrollState) {
-                    items(previewList) { item ->
-                        AppItemCard(item = item, onItemClick = {})
+            Box {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(modifier = Modifier.weight(1f), state = scrollState) {
+                        items(previewList) { item ->
+                            AppItemCard(item = item, onItemClick = {})
+                        }
+                    }
+
+                    Button(
+                        onClick = {},
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(text = "Update")
                     }
                 }
 
-                Button(
-                    onClick = {},
+                CircularProgressIndicator(
                     modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Text(text = "Update")
-                }
+                        .padding(16.dp)
+                        .align(Alignment.TopCenter)
+                )
             }
         }
     }

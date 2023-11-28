@@ -77,11 +77,11 @@ dependencies {
     implementation(libs.androidx.ui.tooling)
     implementation(libs.androidx.ui.test.manifest)
     implementation(libs.ui.runtime)
+    implementation(libs.juniversalchardet)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(libs.androidx.ui.test.junit4)
-
     //dagger
     implementation(libs.dagger)
     kapt(libs.dagger.compiler)

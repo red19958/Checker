@@ -13,21 +13,28 @@ import kotlinx.coroutines.launch
 
 class AppsViewModel(private val app: Application, private val repository: Repository) :
     ViewModel() {
+    private val _apps = MutableStateFlow(emptyList<AppItem>())
+
+    internal val apps = _apps.asStateFlow()
+
+
+    private val _downloaded = MutableStateFlow(false)
+
+    internal val downloaded = _downloaded.asStateFlow()
 
     init {
         initApps()
     }
 
-    private val _apps = MutableStateFlow(emptyList<AppItem>())
-
-    internal val apps = _apps.asStateFlow()
-
     internal fun initApps() {
+        _downloaded.value = false
+
         try {
             viewModelScope.launch(Dispatchers.IO) {
                 repository.getAllInstalledAppsAndEntryPointsWithIcons(app).collect {
                     _apps.emit(it.toAppItem())
                 }
+                _downloaded.value = true
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -42,9 +49,9 @@ class AppsViewModel(private val app: Application, private val repository: Reposi
                 counter++,
                 item.image,
                 item.name,
-                item.services.joinToString(",\n") { it.name },
-                item.providers.joinToString(",\n") { it.name },
-                item.receivers.joinToString(",\n") { it.name },
+                item.services.map { it.name },
+                item.providers.map { it.name },
+                item.receivers.map { it.name },
             )
         }
     }

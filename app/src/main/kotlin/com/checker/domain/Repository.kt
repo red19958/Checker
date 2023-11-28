@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.flowOn
 class Repository {
     internal var appFlow: Flow<List<AppInfo>>? = null
 
-    fun getAllInstalledAppsAndEntryPointsWithIcons(app: Application): Flow<List<AppInfo>> {
+    suspend fun getAllInstalledAppsAndEntryPointsWithIcons(app: Application): Flow<List<AppInfo>> {
         appFlow = flow {
             val appInfoMutableList = mutableListOf<AppInfo>()
             val packageManager = app.applicationContext.packageManager
